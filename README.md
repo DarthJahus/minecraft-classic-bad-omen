@@ -1,6 +1,9 @@
 # Classic Bad Omen
 Minecraft mod that restores **instant Bad Omen** when a raid captain would drop an **ominous bottle**.
 
+[![Modrinth](https://img.shields.io/modrinth/dt/jahus-classic-bad-omen?logo=modrinth&label=Modrinth)](https://modrinth.com/mod/jahus-classic-bad-omen)
+[![CurseForge](https://img.shields.io/curseforge/dt/1798424?logo=curseforge&label=CurseForge)](https://www.curseforge.com/projects/1798424)
+
 Server-side / singleplayer. No dependencies. Clients do not need the mod.
 
 ## Design
