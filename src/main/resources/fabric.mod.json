@@ -3,7 +3,7 @@
   "id": "classicbadomen",
   "version": "${version}",
   "name": "Classic Bad Omen",
-  "description": "Restores instant Bad Omen when a raid captain would drop an ominous bottle. Intercepts the vanilla drop path; configurable probability, bottle drop policy and level mode (stack or drop).",
+  "description": "Restores instant Bad Omen when a raid captain would drop an ominous bottle. Intercepts the vanilla drop path; configurable probability, bottle policy (otherwise/always/never), and level mode (stack or drop).",
   "authors": ["Jahus"],
   "contact": {
     "homepage": "https://mc.jahus.net/projects",

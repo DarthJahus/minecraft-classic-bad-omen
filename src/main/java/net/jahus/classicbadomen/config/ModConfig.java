@@ -11,10 +11,14 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Locale;
+import java.util.Set;
 
 public final class ModConfig {
 
 	private static final Gson GSON = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
+	private static final Set<String> VALID_DROP = Set.of("otherwise", "always", "never");
+	private static final Set<String> VALID_LEVELS = Set.of("stack", "drop");
+
 	private static Path path;
 	private static Data data = new Data();
 
@@ -27,18 +31,19 @@ public final class ModConfig {
 		 */
 		public double bad_omen_probability = 1.0;
 		/**
-		 * Bottle policy when Bad Omen is applied:
+		 * Bottle policy:
 		 * <ul>
-		 *   <li>{@code "otherwise"}: suppress the bottle (classic feel)</li>
-		 *   <li>{@code "always"}: still drop the bottle</li>
+		 *   <li>{@code "otherwise"}: classic; suppress bottle only when Bad Omen is applied</li>
+		 *   <li>{@code "always"}: always keep the bottle (effect + bottle on success)</li>
+		 *   <li>{@code "never"}: never drop the bottle from this path (even on probability fail).
+		 *       Warning: removes a source of ominous bottles needed for Trial Chambers.</li>
 		 * </ul>
-		 * If the probability roll fails, the bottle always drops as vanilla.
 		 */
 		public String drop_ominous_bottle = "otherwise";
 		/**
 		 * How to choose the effect amplifier:
 		 * <ul>
-		 *   <li>{@code "stack"}: old style: +1 per kill (max V), independent of bottle level</li>
+		 *   <li>{@code "stack"}: old style; +1 per kill (max V), independent of bottle level</li>
 		 *   <li>{@code "drop"}: use the same amplifier as the ominous bottle vanilla rolled</li>
 		 * </ul>
 		 */
@@ -80,8 +85,7 @@ public final class ModConfig {
 			data.drop_ominous_bottle = "otherwise";
 		} else {
 			data.drop_ominous_bottle = data.drop_ominous_bottle.trim().toLowerCase(Locale.ROOT);
-			if (!data.drop_ominous_bottle.equals("otherwise")
-					&& !data.drop_ominous_bottle.equals("always")) {
+			if (!VALID_DROP.contains(data.drop_ominous_bottle)) {
 				ClassicBadOmen.LOGGER.warn(
 						"Unknown drop_ominous_bottle='{}', falling back to 'otherwise'",
 						data.drop_ominous_bottle
@@ -94,7 +98,7 @@ public final class ModConfig {
 			data.levels = "stack";
 		} else {
 			data.levels = data.levels.trim().toLowerCase(Locale.ROOT);
-			if (!data.levels.equals("stack") && !data.levels.equals("drop")) {
+			if (!VALID_LEVELS.contains(data.levels)) {
 				ClassicBadOmen.LOGGER.warn(
 						"Unknown levels='{}', falling back to 'stack'",
 						data.levels
@@ -126,13 +130,17 @@ public final class ModConfig {
 		return data.bad_omen_probability;
 	}
 
-	/** {@code true} when value is {@code "always"}. */
-	public static boolean alwaysDropBottle() {
-		return "always".equals(data.drop_ominous_bottle);
-	}
-
 	public static String dropOminousBottle() {
 		return data.drop_ominous_bottle;
+	}
+
+	/** {@code true} when the bottle should be suppressed for this drop. */
+	public static boolean shouldSuppressBottle(boolean effectApplied) {
+		return switch (data.drop_ominous_bottle) {
+			case "never" -> true;
+			case "always" -> false;
+			default -> effectApplied;  // "otherwise"
+		};
 	}
 
 	/** {@code true} when value is {@code "drop"}. */

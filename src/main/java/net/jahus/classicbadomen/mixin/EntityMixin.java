@@ -24,6 +24,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 /**
  * Intercepts vanilla ominous-bottle drops from raiders (raid captains outside a raid, etc.).
  * We do not re-check raid/captain conditions: if vanilla is about to spawn the bottle, that is enough.
+ *
+ * Signature in 26.3: spawnAtLocation(ServerLevel, ItemStack, float)
  */
 @Mixin(Entity.class)
 public abstract class EntityMixin {
@@ -37,10 +39,8 @@ public abstract class EntityMixin {
 		if (!ModConfig.enabled()) {
 			return;
 		}
+
 		Entity self = (Entity) (Object) this;
-		if (level.isClientSide()) {
-			return;
-		}
 		if (!(self instanceof Raider raider)) {
 			return;
 		}
@@ -48,23 +48,23 @@ public abstract class EntityMixin {
 			return;
 		}
 
-		// Probability roll: failure = pure vanilla (bottle drops, no effect).
-		if (raider.getRandom().nextDouble() >= ModConfig.badOmenProbability()) {
-			return;
+		boolean effectApplied = false;
+
+		// Probability roll. On failure, we still may suppress the bottle if policy is "never".
+		if (raider.getRandom().nextDouble() < ModConfig.badOmenProbability()) {
+			Player beneficiary = resolveBeneficiary(raider);
+			if (beneficiary instanceof ServerPlayer serverPlayer) {
+				int amplifier = resolveAmplifier(serverPlayer, stack);
+				serverPlayer.addEffect(new MobEffectInstance(
+						MobEffects.BAD_OMEN,
+						ModConfig.durationTicks(),
+						amplifier
+				));
+				effectApplied = true;
+			}
 		}
 
-		Player beneficiary = resolveBeneficiary(raider);
-		if (beneficiary instanceof ServerPlayer serverPlayer) {
-			int amplifier = resolveAmplifier(serverPlayer, stack);
-			serverPlayer.addEffect(new MobEffectInstance(
-					MobEffects.BAD_OMEN,
-					ModConfig.durationTicks(),
-					amplifier
-			));
-		}
-
-		// "otherwise" = classic: effect instead of bottle. "always" = both.
-		if (!ModConfig.alwaysDropBottle()) {
+		if (ModConfig.shouldSuppressBottle(effectApplied)) {
 			cir.setReturnValue(null);
 		}
 	}
@@ -74,7 +74,7 @@ public abstract class EntityMixin {
 	 * else owner of a tamed animal that got the kill credit.
 	 */
 	@Unique
-    private static Player resolveBeneficiary(Raider raider) {
+	private static Player resolveBeneficiary(Raider raider) {
 		Entity credit = raider.getKillCredit();
 		if (credit instanceof Player player) {
 			return player;
@@ -97,7 +97,7 @@ public abstract class EntityMixin {
 	 * {@code drop} mode: amplifier from the bottle component (0–4).
 	 */
 	@Unique
-    private static int resolveAmplifier(ServerPlayer player, ItemStack bottle) {
+	private static int resolveAmplifier(ServerPlayer player, ItemStack bottle) {
 		if (ModConfig.levelsFromDrop()) {
 			OminousBottleAmplifier fromBottle = bottle.get(DataComponents.OMINOUS_BOTTLE_AMPLIFIER);
 			if (fromBottle != null) {
