@@ -1,0 +1,30 @@
+modLoader="javafml"
+loaderVersion="[4,)"
+license="${mod_license}"
+
+[[mods]]
+modId="${mod_id}"
+version="${mod_version}"
+displayName="${mod_name}"
+authors="${mod_authors}"
+description='''
+Restores instant Bad Omen when a raid captain would drop an ominous bottle.
+Intercepts the vanilla drop path; configurable probability, bottle policy (otherwise/always/never), and level mode (stack or drop).
+'''
+
+[[mixins]]
+config="classicbadomen.mixins.json"
+
+[[dependencies.${mod_id}]]
+	modId="neoforge"
+	type="required"
+	versionRange="[26.3,)"
+	ordering="NONE"
+	side="BOTH"
+
+[[dependencies.${mod_id}]]
+	modId="minecraft"
+	type="required"
+	versionRange="[26.3,)"
+	ordering="NONE"
+	side="BOTH"
