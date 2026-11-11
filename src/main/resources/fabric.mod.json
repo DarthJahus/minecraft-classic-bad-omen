@@ -10,6 +10,7 @@
     "sources": "https://github.com/DarthJahus/minecraft-classicbadomen",
     "issues": "https://github.com/DarthJahus/minecraft-classicbadomen/issues"
   },
+  "icon": "assets/classicbadomen/icon.png",
   "license": "Apache-2.0",
   "environment": "*",
   "entrypoints": {
