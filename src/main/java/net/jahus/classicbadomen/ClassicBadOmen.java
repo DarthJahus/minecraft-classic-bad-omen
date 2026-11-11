@@ -1,21 +1,21 @@
 package net.jahus.classicbadomen;
 
-import net.fabricmc.api.ModInitializer;
-import net.fabricmc.loader.api.FabricLoader;
 import net.jahus.classicbadomen.config.ModConfig;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.loading.FMLPaths;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public final class ClassicBadOmen implements ModInitializer {
+@Mod(ClassicBadOmen.MOD_ID)
+public final class ClassicBadOmen {
 
 	public static final String MOD_ID = "classicbadomen";
 	public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 
-	@Override
-	public void onInitialize() {
-		ModConfig.load(FabricLoader.getInstance().getConfigDir());
+	public ClassicBadOmen() {
+		ModConfig.load(FMLPaths.CONFIGDIR.get());
 		LOGGER.info(
-				"Classic Bad Omen loaded (enabled={}, probability={}, drop_bottle={}, levels={}, duration={})",
+				"Classic Bad Omen (Forge) loaded (enabled={}, probability={}, drop_bottle={}, levels={}, duration={})",
 				ModConfig.enabled(),
 				ModConfig.badOmenProbability(),
 				ModConfig.dropOminousBottle(),
